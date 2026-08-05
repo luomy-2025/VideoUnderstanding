@@ -1,0 +1,13 @@
+# uv虚拟环境，禁止上传
+.venv/
+.uv/
+
+# 代码缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# # 训练输出权重
+# output/
+# datasets/
+# Qwen3-VL/

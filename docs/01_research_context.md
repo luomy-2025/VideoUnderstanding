@@ -37,6 +37,12 @@ The current phase focuses on SQ1 while preserving `step_id`, frame index, timest
 缺乏对证据间逻辑关系及证据与问题子目标之间关联的深层推理。
 
 ## Innovation 1
+**创新点一：规划驱动的判别性证据选择。**
+   联合理解问题与全部候选选项，分析选项之间真正需要区分的视觉差异，将其转化为可执行的证据搜索计划，并在固定视觉预算下选择覆盖关键子目标、具有选项判别性、时间互补且低冗余的关键帧或片段。
+
+
+
+
 
 **Chinese:** 选项对比式证据规划与固定预算集合选帧  
 **English:** Option-Contrastive Evidence Planning and Budgeted Set Selection
@@ -84,6 +90,8 @@ Qwen3-VL answers the original MCQ
 ```
 
 ## Innovation 2
+**创新点二：关系感知的结构化证据推理。**
+   对创新点一选出的证据进行结构化组织，显式建立“问题子步骤—关键帧/片段—时间关系—候选选项”之间的对应、支持、反驳和因果关系，使视频大模型能够沿清晰的证据路径完成多步推理，而不是简单按时间拼接帧后直接回答。
 
 
 ## Datasets

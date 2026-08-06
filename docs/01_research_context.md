@@ -17,6 +17,8 @@ Existing methods mainly use uniform sampling, fixed FPS, or question-frame relev
 > Question relevance is not equal to answer discriminativeness.
 
 We study how to jointly understand the question and all options, convert option differences into observable evidence requirements, and select a low-redundancy evidence set that covers key subgoals under a fixed visual budget.
+凝练1：现有长视频问答方法中，均匀采样缺乏问题导向，
+而基于相关性的检索采样容易产生证据集中，难以在有限视觉预算下完整覆盖回答问题所需的关键证据。
 
 ### SQ2 — Use the selected evidence well
 
@@ -29,6 +31,8 @@ Selected frames are often concatenated chronologically without explicitly modeli
 - support, refutation, conflict, complementarity, precedence, and causality.
 
 The current phase focuses on SQ1 while preserving `step_id`, frame index, timestamp, option contrast, temporal constraint, and evidence type for SQ2.
+凝练2：现有长视频问答方法通常对视觉证据进行扁平化拼接与聚合，
+缺乏对证据间逻辑关系及证据与问题子目标之间关联的深层推理。
 
 ## Innovation 1
 
@@ -45,8 +49,7 @@ Jointly analyze visually observable differences among all candidate options, con
 - reduces redundancy;
 - stays within a fixed frame budget.
   
-凝练1：现有长视频问答方法中，均匀采样缺乏问题导向，
-而基于相关性的检索采样容易产生证据集中，难以在有限视觉预算下完整覆盖回答问题所需的关键证据。
+
 
 ### Do not claim as novelty by itself
 
@@ -79,8 +82,7 @@ Qwen3-VL answers the original MCQ
 ```
 
 ## Innovation 2
-凝练2：现有长视频问答方法通常对视觉证据进行扁平化拼接与聚合，
-缺乏对证据间逻辑关系及证据与问题子目标之间关联的深层推理。
+
 
 ## Datasets
 

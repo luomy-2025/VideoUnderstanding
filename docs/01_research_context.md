@@ -44,6 +44,8 @@ Jointly analyze visually observable differences among all candidate options, con
 - satisfies temporal constraints;
 - reduces redundancy;
 - stays within a fixed frame budget.
+  凝练1：现有长视频问答方法中，均匀采样缺乏问题导向，
+而基于相关性的检索采样容易产生证据集中，难以在有限视觉预算下完整覆盖回答问题所需的关键证据。
 
 ### Do not claim as novelty by itself
 

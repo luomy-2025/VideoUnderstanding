@@ -2,7 +2,7 @@
 
 目前是打算使用Adaptive Keyframe Sampling for Long Video Understanding这篇论文的仓库作为我们的基底,仓库是AKS-test
 
-我们使用这个仓库为基地来实现我们的第一个创新点,在此仓库上面慢慢修改内容,按照docs/01_research_context.md文件里面的步骤,一步一步的实现我们的第一个想法
+我们使用这个仓库为基础实现第一个创新点，并按照[研究背景与创新点](research_context.md)中的步骤逐步推进。
 
 按照一下五步骤:
 

@@ -1,7 +1,7 @@
 [project]
 name = "VideoUnderstanding"
 version = "0.1.0"
-requires-python = ">=3.12"
+requires-python = ">=3.12, <3.13"
 dependencies = [
     "accelerate==1.13.0",
     "aiohappyeyeballs==2.6.1",
@@ -212,3 +212,42 @@ train = "scripts.train:main"
 [build-system]
 requires = ["setuptools==80.10.2"]
 build-backend = "setuptools.build_meta"
+
+
+# ============================================================
+# Package indexes
+# ============================================================
+
+# PyTorch CUDA 12.9
+# 只给 torch / torchvision / torchaudio / torchcodec 使用
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true
+
+
+# 普通 Python 包全部走清华 TUNA
+# default = true 会替代 uv 默认的 PyPI index
+[[tool.uv.index]]
+name = "tuna"
+url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+default = true
+
+
+# ============================================================
+# Explicit PyTorch package sources
+# ============================================================
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu129" }
+torchvision = { index = "pytorch-cu129" }
+torchaudio = { index = "pytorch-cu129" }
+torchcodec = { index = "pytorch-cu129" }
+
+
+# ============================================================
+# uv project configuration
+# ============================================================
+
+[tool.uv]
+package = false

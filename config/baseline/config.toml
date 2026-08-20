@@ -1,0 +1,25 @@
+[paths]
+question_file = "/root/HNLP/VideoVista-2/videovista2_no_answer.json"
+video_base_dir = "/root/HNLP/VideoVista-2"
+save_path = "/root/HNLP/ReaonProcess/result/Baseline-lowtemptaure-30b.json"
+model_path = "/root/HNLP/qwen3-vl-30b"
+
+[model]
+trust_remote_code = true
+tensor_parallel_size = 1
+max_model_len = 256000
+async_scheduling = true
+max_pixels = 230400
+num_frames = 180
+
+[generation]
+temperature = 0.0
+top_p = 1.0
+max_tokens = 32
+repetition_penalty = 1.0
+
+[prompt]
+answer_instruction = "Answer the question only with single option's letter. For example: A"
+
+[logging]
+log_file = "../../scripts/log/test.log"

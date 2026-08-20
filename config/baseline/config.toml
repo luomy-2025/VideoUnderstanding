@@ -1,8 +1,8 @@
 [paths]
-question_file = "/root/HNLP/VideoVista-2/videovista2_no_answer.json"
-video_base_dir = "/root/HNLP/VideoVista-2"
-save_path = "/root/HNLP/ReaonProcess/result/Baseline-lowtemptaure-30b.json"
-model_path = "/root/HNLP/qwen3-vl-30b"
+question_file = "/home/chenkai/VideoUnderstanding/datasets/videomme2/videovista2_no_answer.json"
+video_base_dir = "/data/ck_data/VideoVista-2"
+save_path = "/home/chenkai/VideoUnderstanding/output/result/raw_result/baseline-videovista2.json"
+model_path = "/data/ck_data/models/Qwen-3VL-8B-instruct"
 
 [model]
 trust_remote_code = true

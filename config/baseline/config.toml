@@ -4,6 +4,9 @@ video_base_dir = "/data/ck_data/VideoVista-2"
 save_path = "/home/chenkai/VideoUnderstanding/output/result/raw_result/baseline-videovista2.json"
 model_path = "/data/ck_data/models/Qwen-3VL-8B-instruct"
 
+[runtime]
+cuda_device = 0
+
 [model]
 trust_remote_code = true
 tensor_parallel_size = 1

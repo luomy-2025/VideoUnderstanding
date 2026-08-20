@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NotRequired, TypedDict, cast
+from typing import TYPE_CHECKING, NotRequired, TypedDict, cast
 
 from tqdm import tqdm
-from vllm import LLM, SamplingParams
+
+if TYPE_CHECKING:
+    from vllm import LLM, SamplingParams
 
 
 class DatasetItem(TypedDict):
@@ -55,6 +58,11 @@ class PathConfig:
 
 
 @dataclass(frozen=True)
+class RuntimeConfig:
+    cuda_device: int
+
+
+@dataclass(frozen=True)
 class ModelConfig:
     trust_remote_code: bool
     tensor_parallel_size: int
@@ -80,6 +88,7 @@ class PromptConfig:
 @dataclass(frozen=True)
 class BaselineConfig:
     paths: PathConfig
+    runtime: RuntimeConfig
     model: ModelConfig
     generation: GenerationConfig
     prompt: PromptConfig
@@ -115,6 +124,13 @@ def require_positive_integer(table: TomlTable, key: str, section: str) -> int:
     value = require_integer(table, key, section)
     if value <= 0:
         raise ValueError(f"配置项 [{section}].{key} 必须大于 0")
+    return value
+
+
+def require_non_negative_integer(table: TomlTable, key: str, section: str) -> int:
+    value = require_integer(table, key, section)
+    if value < 0:
+        raise ValueError(f"配置项 [{section}].{key} 不能小于 0")
     return value
 
 
@@ -156,6 +172,7 @@ def load_config(config_path: Path) -> BaselineConfig:
 
     config = cast(TomlTable, raw_config)
     paths = require_table(config, "paths")
+    runtime = require_table(config, "runtime")
     model = require_table(config, "model")
     generation = require_table(config, "generation")
     prompt = require_table(config, "prompt")
@@ -168,6 +185,12 @@ def load_config(config_path: Path) -> BaselineConfig:
     top_p = require_number(generation, "top_p", "generation")
     if not 0 < top_p <= 1:
         raise ValueError("配置项 [generation].top_p 必须在 (0, 1] 范围内")
+
+    tensor_parallel_size = require_positive_integer(
+        model, "tensor_parallel_size", "model"
+    )
+    if tensor_parallel_size != 1:
+        raise ValueError("指定单张 CUDA 设备时，[model].tensor_parallel_size 必须为 1")
 
     return BaselineConfig(
         paths=PathConfig(
@@ -184,13 +207,16 @@ def load_config(config_path: Path) -> BaselineConfig:
                 require_string(paths, "model_path", "paths"), config_dir
             ),
         ),
+        runtime=RuntimeConfig(
+            cuda_device=require_non_negative_integer(
+                runtime, "cuda_device", "runtime"
+            )
+        ),
         model=ModelConfig(
             trust_remote_code=require_boolean(
                 model, "trust_remote_code", "model"
             ),
-            tensor_parallel_size=require_positive_integer(
-                model, "tensor_parallel_size", "model"
-            ),
+            tensor_parallel_size=tensor_parallel_size,
             max_model_len=require_positive_integer(
                 model, "max_model_len", "model"
             ),
@@ -218,7 +244,14 @@ def load_config(config_path: Path) -> BaselineConfig:
     )
 
 
+def configure_cuda_device(config: RuntimeConfig) -> None:
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(config.cuda_device)
+
+
 def create_llm(config: BaselineConfig) -> LLM:
+    from vllm import LLM
+
     return LLM(
         model=str(config.paths.model_path),
         trust_remote_code=config.model.trust_remote_code,
@@ -232,6 +265,8 @@ def create_llm(config: BaselineConfig) -> LLM:
 
 
 def create_sampling_params(config: GenerationConfig) -> SamplingParams:
+    from vllm import SamplingParams
+
     return SamplingParams(
         temperature=config.temperature,
         top_p=config.top_p,
@@ -360,6 +395,11 @@ def load_dataset(question_file: Path) -> list[DatasetItem]:
 
 
 def run(config: BaselineConfig) -> None:
+    configure_cuda_device(config.runtime)
+    print(
+        "使用 CUDA 物理设备 "
+        f"{config.runtime.cuda_device}；该设备在当前进程中映射为 cuda:0"
+    )
     config.paths.save_path.parent.mkdir(parents=True, exist_ok=True)
 
     data = load_dataset(config.paths.question_file)

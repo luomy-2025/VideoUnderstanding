@@ -14,9 +14,10 @@ max_model_len = 256000
 async_scheduling = true
 max_pixels = 230400
 num_frames = 180
+max_num_batched_tokens = 16384
 
 [model.limit_mm_per_prompt]
-video = 2
+video = 1
 
 [generation]
 temperature = 0.0

@@ -15,6 +15,9 @@ async_scheduling = true
 max_pixels = 230400
 num_frames = 180
 
+[model.limit_mm_per_prompt]
+video = 2
+
 [generation]
 temperature = 0.0
 top_p = 1.0

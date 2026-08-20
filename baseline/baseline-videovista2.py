@@ -63,6 +63,11 @@ class RuntimeConfig:
 
 
 @dataclass(frozen=True)
+class MultiModalLimitConfig:
+    video: int
+
+
+@dataclass(frozen=True)
 class ModelConfig:
     trust_remote_code: bool
     tensor_parallel_size: int
@@ -70,6 +75,7 @@ class ModelConfig:
     async_scheduling: bool
     max_pixels: int
     num_frames: int
+    limit_mm_per_prompt: MultiModalLimitConfig
 
 
 @dataclass(frozen=True)
@@ -174,6 +180,7 @@ def load_config(config_path: Path) -> BaselineConfig:
     paths = require_table(config, "paths")
     runtime = require_table(config, "runtime")
     model = require_table(config, "model")
+    limit_mm_per_prompt = require_table(model, "limit_mm_per_prompt")
     generation = require_table(config, "generation")
     prompt = require_table(config, "prompt")
     config_dir = resolved_config_path.parent
@@ -225,6 +232,11 @@ def load_config(config_path: Path) -> BaselineConfig:
             ),
             max_pixels=require_positive_integer(model, "max_pixels", "model"),
             num_frames=require_positive_integer(model, "num_frames", "model"),
+            limit_mm_per_prompt=MultiModalLimitConfig(
+                video=require_positive_integer(
+                    limit_mm_per_prompt, "video", "model.limit_mm_per_prompt"
+                )
+            ),
         ),
         generation=GenerationConfig(
             temperature=temperature,
@@ -259,6 +271,9 @@ def create_llm(config: BaselineConfig) -> LLM:
         allowed_local_media_path=str(config.paths.video_base_dir),
         max_model_len=config.model.max_model_len,
         async_scheduling=config.model.async_scheduling,
+        limit_mm_per_prompt={
+            "video": config.model.limit_mm_per_prompt.video,
+        },
         mm_processor_kwargs={"max_pixels": config.model.max_pixels},
         media_io_kwargs={"video": {"num_frames": config.model.num_frames}},
     )
@@ -356,6 +371,17 @@ def load_existing_outputs(save_path: Path) -> list[StoredPrediction]:
     return outputs
 
 
+def select_successful_outputs(
+    stored_outputs: list[StoredPrediction],
+) -> tuple[list[StoredPrediction], int]:
+    outputs = [
+        output
+        for output in stored_outputs
+        if "error" not in output and output["prediction"].strip()
+    ]
+    return outputs, len(stored_outputs) - len(outputs)
+
+
 def save_outputs(outputs: list[StoredPrediction], save_path: Path) -> None:
     tmp_path = save_path.with_name(f"{save_path.name}.tmp")
     with tmp_path.open("w", encoding="utf-8") as json_file:
@@ -406,7 +432,11 @@ def run(config: BaselineConfig) -> None:
     llm = create_llm(config)
     sampling_params = create_sampling_params(config.generation)
 
-    outputs = load_existing_outputs(config.paths.save_path)
+    stored_outputs = load_existing_outputs(config.paths.save_path)
+    outputs, retry_count = select_successful_outputs(stored_outputs)
+    if retry_count:
+        print(f"检测到 {retry_count} 条失败或空预测记录，本次将重新处理")
+
     finished_ids = {item["question_id"] for item in outputs}
     bar = tqdm(data)
 

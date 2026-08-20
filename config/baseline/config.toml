@@ -5,7 +5,7 @@ save_path = "/home/chenkai/VideoUnderstanding/output/result/raw_result/baseline-
 model_path = "/data/ck_data/models/Qwen-3VL-8B-instruct"
 
 [runtime]
-cuda_device = 0
+cuda_device = 1
 
 [model]
 trust_remote_code = true
